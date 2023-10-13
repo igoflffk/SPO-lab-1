@@ -1,0 +1,6 @@
+function f(x as string, y as long) as int
+	dim x as int 
+	x = y + z;
+end function
+
+
