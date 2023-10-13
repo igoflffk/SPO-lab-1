@@ -49,9 +49,9 @@ tokens
 
 
 
-StringLiteral
+STR
 	: '"' DoubleStringCharacter* '"'
-	| '\'' SingleStringCharacter* '\''
+	| '\'' CHAR* '\''
 	;
 	
 fragment DoubleStringCharacter
@@ -59,7 +59,7 @@ fragment DoubleStringCharacter
 	| '\\' EscapeSequence
 	;
 
-fragment SingleStringCharacter
+fragment CHAR
 	: ~('\'' | '\\')	
 	| '\\' EscapeSequence
 	;
@@ -86,8 +86,7 @@ fragment EscapeCharacter
 
 identifier: s=ID -> ^(AST_ID $s); 
 
-STR :   '"\"[^\"\\]*(?:\\.[^\"\\]*)*\"' ;
-CHAR:   '[''^'']' ;
+
 BITSCONST :   ('0') ('b'|'B') ('0'|'1')+ ;
 BOOL:   ('true'|'false') ;
 ID  :   ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')* ;
