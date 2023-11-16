@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DirectedGraph Title="DrivingTest" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
+   <Nodes>
+      <Node Id="Driver" Label="Driver" />
+      <Node Id="Car" Label="Car" />
+      <Node Id="Truck" Label="Truck" />
+      <Node Id="Passenger"  />
+   </Nodes>
+   <Links>
+      <Link Source="Driver" Target="Car"  />
+      <Link Source="Driver" Target="Truck"  />
+   </Links>
+</DirectedGraph>

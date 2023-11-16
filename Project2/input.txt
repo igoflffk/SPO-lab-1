@@ -1,0 +1,30 @@
+function f(x as string, y as long) as int
+	dim x as int 
+
+	do 
+		dim y as int 
+		x = y ;
+	loop while z < 3
+		
+	if x < k then
+				x+2;
+	end if	
+	
+	while z > c 
+	
+		if x > k then
+			y + k;
+			if x < k then
+				x+2;
+			else
+				break
+			end if	
+		else 
+			break
+		end if	
+
+		x+2;
+
+	wend	
+end function
+
