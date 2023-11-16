@@ -1,1 +1,1 @@
-# SPO-lab-1
+# SPO-labs
