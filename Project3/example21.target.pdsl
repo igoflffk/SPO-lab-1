@@ -1,0 +1,271 @@
+﻿
+architecture c21 {
+
+/*
+	case				
+	data word length	2
+	code model			Стековый
+	spaces				код, константы, данные
+*/
+
+registers:
+
+	storage sp [32];
+	storage bp [32];
+	storage ip [32];
+
+	storage inp [8];
+	storage outp [8];
+	
+memory:
+	
+	range constant_ram [0x0000 .. 0xffffffff] {
+		cell = 8;
+		endianess = big-endian;
+		granularity = 2;
+	}
+
+	range code_ram [0x0000 .. 0xffffffff] {
+		cell = 8;
+		endianess = little-endian;
+		granularity = 2;
+	}
+
+	range data_ram [0x0000 .. 0xffffffff] {
+		cell = 8;
+		endianess = little-endian;
+		granularity = 2;
+	}
+
+instructions:
+
+	encode imm16 field = immediate [16];
+	encode imm32 field = immediate [32];
+	encode imm64 field = immediate [64];
+
+	instruction sum = { 1001 0001 } {
+		sp = sp - 8; let a = data_ram:8[sp];
+		sp = sp - 8; let b = data_ram:8[sp];
+		data_ram:8[sp] = a + b; sp = sp + 8;
+		ip = ip + 1;
+	};
+
+	instruction sub = { 1001 0010 } {
+		sp = sp - 8; let a = data_ram:8[sp];
+		sp = sp - 8; let b = data_ram:8[sp];
+		data_ram:8[sp] = a - b; sp = sp + 8;
+		ip = ip + 1;
+	};
+
+	instruction mul = { 1001 0011 } {
+		sp = sp - 8; let a = data_ram:8[sp];
+		sp = sp - 8; let b = data_ram:8[sp];
+		data_ram:8[sp] = a * b; sp = sp + 8;
+		ip = ip + 1;
+	};
+
+	instruction div = { 1001 0100 } {
+		sp = sp - 8; let a = data_ram:8[sp];
+		sp = sp - 8; let b = data_ram:8[sp];
+		data_ram:8[sp] = a / b; sp = sp + 8;
+		ip = ip + 1;
+	};
+
+	instruction not = { 1001 0101 } {
+		sp = sp - 8; let a = data_ram:8[sp];
+		data_ram:8[sp] = !a; sp = sp + 8;
+		ip = ip + 1;
+	};
+
+	instruction neg = { 1001 0110 } {
+		sp = sp - 8; let a = data_ram:8[sp];
+		data_ram:8[sp] = -a; sp = sp + 8;
+		ip = ip + 1;
+	};
+
+	instruction or = { 1001 0111 } {
+		sp = sp - 8; let a = data_ram:8[sp];
+		sp = sp - 8; let b = data_ram:8[sp];
+		data_ram:8[sp] = a | b; sp = sp + 8;
+		ip = ip + 1;
+	};
+
+	instruction and = { 1001 1000 } {
+		sp = sp - 8; let a = data_ram:8[sp];
+		sp = sp - 8; let b = data_ram:8[sp];
+		data_ram:8[sp] = a & b; sp = sp + 8;
+		ip = ip + 1;
+	};
+
+	instruction greater = { 1001 1001} {
+		sp = sp - 8; let a = data_ram:8[sp];
+		sp = sp - 8; let b = data_ram:8[sp]
+		if a>b then 
+			data_ram:8[sp] = 1 ; sp = sp + 8;
+		else 
+			data_ram:8[sp] = 0 ; sp = sp + 8;
+		ip = ip + 1;
+	};
+
+	instruction greaterOrEqual = { 1001 1001} {
+		sp = sp - 8; let a = data_ram:8[sp];
+		sp = sp - 8; let b = data_ram:8[sp]
+		if a>=b then 
+			data_ram:8[sp] = 1 ; sp = sp + 8;
+		else 
+			data_ram:8[sp] = 0 ; sp = sp + 8;
+		ip = ip + 1;
+	};
+
+
+	instruction lessOrEqual = { 1001 1001} {
+		sp = sp - 8; let a = data_ram:8[sp];
+		sp = sp - 8; let b = data_ram:8[sp]
+		if a<=b then 
+			data_ram:8[sp] = 1 ; sp = sp + 8;
+		else 
+			data_ram:8[sp] = 0 ; sp = sp + 8;
+		ip = ip + 1;
+	};
+
+	
+	instruction pushImm64 = { 0001 0011, imm64 as value } {
+		data_ram:8[sp] = value; sp = sp + 8;
+		ip = ip + 9;
+	};
+
+	instruction hlt = { 0111 0000 } {
+	};
+
+	//end of frame 
+	instruction dup = { 0000 0001 } {
+		sp = sp - 8; let x = data_ram:8[sp];
+		data_ram:8[sp] = x; sp = sp + 8;
+		data_ram:8[sp] = x; sp = sp + 8;
+		ip = ip + 1;
+	};
+
+	instruction loadIndirectData8 = { 0000 0010 } {
+		sp = sp - 8; let ptr = data_ram:8[sp];
+		data_ram:8[sp] = data_ram:8[ptr]; sp = sp + 8;
+		ip = ip + 1;
+	};
+
+	instruction loadIndirectConst8 = { 0000 0100 } {
+		sp = sp - 8; let ptr = constant_ram:8[sp];
+		data_ram:8[sp] = data_ram:8[ptr]; sp = sp + 8;
+		ip = ip + 1;
+	};
+
+	instruction storeIndirectData8 = { 0000 1000 } {
+		sp = sp - 8; let value = data_ram:8[sp];
+		sp = sp - 8; let ptr = data_ram:8[sp];
+		data_ram:8[ptr] = value;
+		ip = ip + 1;
+	};
+
+	instruction storeIndirectData4 = { 0000 1001 } {
+		sp = sp - 8; let value = data_ram:8[sp];
+		sp = sp - 8; let ptr = data_ram:8[sp];
+		data_ram:4[ptr] = value;
+		ip = ip + 1;
+	};
+
+	instruction storeIndirectData2 = { 0000 1010 } {
+		sp = sp - 8; let value = data_ram:8[sp];
+		sp = sp - 8; let ptr = data_ram:8[sp];
+		data_ram:2[ptr] = value;
+		ip = ip + 1;
+	};
+
+	instruction storeIndirectData1 = { 0000 1011 } {
+		sp = sp - 8; let value = data_ram:8[sp];
+		sp = sp - 8; let ptr = data_ram:8[sp];
+		data_ram:1[ptr] = value;
+		ip = ip + 1;
+	};
+
+	instruction brt = { 0001 0100, imm32 as target } {
+		sp = sp - 8; let value = data_ram:8[sp];
+		if value then
+			ip = target;
+		else 
+			ip = ip + 5;
+	};
+
+	instruction br = { 0001 0101, imm32 as target } {
+		ip = target;
+	};
+
+	instruction bri = { 0001 0110 } {
+		sp = sp - 8; let target = data_ram:8[sp];
+		ip = target;
+	};
+
+	instruction allocSlots = { 0001 0111, imm32 as amount } {
+		sp = sp + 8 * amount;
+		ip = target + 5;
+	};
+
+	instruction call = { 0001 1000, imm32 as target } {
+		data_ram:8[sp] = ip; sp = sp + 8;
+		data_ram:8[sp] = bp; sp = sp + 8;
+		bp = sp;
+		ip = target + 5;
+	};
+
+	instruction calli = { 0001 1001 } {
+		sp = sp - 8; let target = data_ram:8[sp];
+		data_ram:8[sp] = ip; sp = sp + 8;
+		data_ram:8[sp] = bp; sp = sp + 8;
+		bp = sp;
+		ip = target;
+	};
+
+	instruction ret = { 0001 1010 } {
+		sp = sp - 8; let retVal = data_ram:8[sp];
+		sp = bp;
+		sp = sp - 8; bp = data_ram:8[sp];
+		sp = sp - 8; let target = data_ram:8[sp];
+		data_ram:8[sp] = retVal; sp = sp + 8;
+		ip = target;
+	};
+	
+
+mnemonics:
+
+	mnemonic hlt();
+
+	format plain1 is "{1}";
+	format plain2 is "{1}, {2}";
+
+	mnemonic sum();
+	mnemonic sub();
+	mnemonic mul();
+	mnemonic div();
+	mnemonic not();
+	mnemonic neg();
+	mnemonic or();
+	mnemonic and();
+	mnemonic greater();
+	mnemonic less();
+	mnemonic greaterOrEqual();
+	mnemonic lessOrEqual();
+
+	mnemonic pushq for pushImm64(value) plain1;
+	mnemonic brt(target) plain1;
+	mnemonic br(target) plain1;
+	mnemonic bri();
+	mnemonic dup();
+	mnemonic alsl(amount) plain1;
+	mnemonic call(target) plain1;
+	mnemonic calli(target) plain1;
+	mnemonic ret;
+
+	mnemonic ldd8 for loadIndirectData8();
+	mnemonic ldc8 for loadIndirectConst8();
+	mnemonic std8 for storeIndirectData8();
+	mnemonic std4 for storeIndirectData4();
+	mnemonic std2 for storeIndirectData2();
+	mnemonic std1 for storeIndirectData1();
+}
